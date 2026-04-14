@@ -1,249 +1,377 @@
-import { useEffect, useState, useRef } from "react"
-import photo from "../photo.jpg"
+import { useEffect, useRef, useState } from "react"
 
-const roles = ["Full Stack Developer", "AI Engineer", "UI/UX Designer", "Mobile App Developer", "Computer Vision Expert"]
+const PIXEL_SIZE = 7
 
-function ParticleNetwork() {
-  const canvasRef = useRef(null)
-  const mouse = useRef({ x: 0, y: 0 })
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
-    let W = canvas.width = window.innerWidth
-    let H = canvas.height = window.innerHeight
-
-    const PARTICLE_COUNT = 80
-    const CONNECTION_DIST = 150
-    const MOUSE_DIST = 200
-
-    const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      r: Math.random() * 1.5 + 0.5,
-      alpha: Math.random() * 0.5 + 0.2,
-    }))
-
-    const onMouseMove = e => { mouse.current = { x: e.clientX, y: e.clientY } }
-    window.addEventListener("mousemove", onMouseMove)
-
-    let frame
-    function draw() {
-      ctx.clearRect(0, 0, W, H)
-
-      particles.forEach(p => {
-        const dx = mouse.current.x - p.x
-        const dy = mouse.current.y - p.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < MOUSE_DIST) {
-          p.vx += dx * 0.00008
-          p.vy += dy * 0.00008
-        }
-
-        p.x += p.vx
-        p.y += p.vy
-        p.vx *= 0.99
-        p.vy *= 0.99
-
-        if (p.x < 0 || p.x > W) p.vx *= -1
-        if (p.y < 0 || p.y > H) p.vy *= -1
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(34, 211, 238, ${p.alpha})`
-        ctx.fill()
+function buildParticles(w, h) {
+  const cols = Math.ceil(w / PIXEL_SIZE)
+  const rows = Math.ceil(h / PIXEL_SIZE)
+  const particles = []
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const angle = Math.random() * Math.PI * 2
+      const dist = 120 + Math.random() * Math.max(w, h) * 0.9
+      particles.push({
+        ox: c * PIXEL_SIZE,
+        oy: r * PIXEL_SIZE,
+        dx: Math.cos(angle) * dist,
+        dy: Math.sin(angle) * dist,
+        // slight gold tint on scatter
+        goldMix: Math.random() * 0.6,
       })
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < CONNECTION_DIST) {
-            const opacity = (1 - dist / CONNECTION_DIST) * 0.15
-            ctx.beginPath()
-            ctx.moveTo(particles[i].x, particles[i].y)
-            ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`
-            ctx.lineWidth = 0.5
-            ctx.stroke()
-          }
-        }
-      }
-
-      const mdx = mouse.current.x
-      const mdy = mouse.current.y
-      particles.forEach(p => {
-        const dx = mdx - p.x
-        const dy = mdy - p.y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < MOUSE_DIST) {
-          const opacity = (1 - dist / MOUSE_DIST) * 0.3
-          ctx.beginPath()
-          ctx.moveTo(p.x, p.y)
-          ctx.lineTo(mdx, mdy)
-          ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`
-          ctx.lineWidth = 0.5
-          ctx.stroke()
-        }
-      })
-
-      frame = requestAnimationFrame(draw)
     }
-    draw()
-
-    const onResize = () => {
-      W = canvas.width = window.innerWidth
-      H = canvas.height = window.innerHeight
-    }
-    window.addEventListener("resize", onResize)
-
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener("mousemove", onMouseMove)
-      window.removeEventListener("resize", onResize)
-    }
-  }, [])
-
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+  }
+  return particles
 }
 
-function TypingText() {
-  const [index, setIndex] = useState(0)
-  const [displayed, setDisplayed] = useState("")
-  const [deleting, setDeleting] = useState(false)
-
-  useEffect(() => {
-    const current = roles[index]
-    let timeout
-    if (!deleting && displayed.length < current.length) {
-      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 70)
-    } else if (!deleting && displayed.length === current.length) {
-      timeout = setTimeout(() => setDeleting(true), 2500)
-    } else if (deleting && displayed.length > 0) {
-      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length - 1)), 35)
-    } else if (deleting && displayed.length === 0) {
-      setDeleting(false)
-      setIndex((index + 1) % roles.length)
-    }
-    return () => clearTimeout(timeout)
-  }, [displayed, deleting, index])
-
-  return (
-    <span className="text-gradient">
-      {displayed}
-      <span className="animate-pulse text-cyan-400">|</span>
-    </span>
-  )
+function easeInOut(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
 export default function Hero() {
+  const sectionRef = useRef(null)
+  const canvasRef = useRef(null)
+  const imgRef = useRef(null)
+  const particlesRef = useRef([])
+  const rafRef = useRef(null)
+  const progressRef = useRef(0)
+  const [imgLoaded, setImgLoaded] = useState(false)
+
+  // Draw frame
+  const draw = (progress) => {
+    const canvas = canvasRef.current
+    if (!canvas || !imgRef.current) return
+    const ctx = canvas.getContext("2d")
+    const W = canvas.width
+    const H = canvas.height
+    const p = easeInOut(Math.min(1, Math.max(0, progress)))
+
+    ctx.clearRect(0, 0, W, H)
+
+    const particles = particlesRef.current
+    for (const pt of particles) {
+      const x = pt.ox + pt.dx * p
+      const y = pt.oy + pt.dy * p
+      // Draw source pixel
+      ctx.drawImage(imgRef.current, pt.ox, pt.oy, PIXEL_SIZE, PIXEL_SIZE, x, y, PIXEL_SIZE, PIXEL_SIZE)
+      // Gold overlay tint as particles scatter
+      if (p > 0.05) {
+        ctx.fillStyle = `rgba(201,169,110,${pt.goldMix * p * 0.55})`
+        ctx.fillRect(x, y, PIXEL_SIZE, PIXEL_SIZE)
+      }
+    }
+  }
+
+  // Init canvas size and particles when image loads
+  const initCanvas = () => {
+    const canvas = canvasRef.current
+    const img = imgRef.current
+    if (!canvas || !img) return
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
+    particlesRef.current = buildParticles(img.naturalWidth, img.naturalHeight)
+    draw(0)
+    setImgLoaded(true)
+  }
+
+  // Scroll handler
+  useEffect(() => {
+    const onScroll = () => {
+      const section = sectionRef.current
+      if (!section) return
+      const rect = section.getBoundingClientRect()
+      const viewH = window.innerHeight
+      // Start scatter when hero top reaches 20% up from bottom, complete when it exits top
+      const start = viewH * 0.8
+      const end = -rect.height * 0.3
+      const raw = 1 - (rect.top - end) / (start - end)
+      const clamped = Math.min(1, Math.max(0, raw))
+      if (Math.abs(clamped - progressRef.current) > 0.002) {
+        progressRef.current = clamped
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(() => draw(clamped))
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  // Animate in on mount
+  useEffect(() => {
+    if (!imgLoaded) return
+    let start = null
+    const duration = 1200
+    const animate = (ts) => {
+      if (!start) start = ts
+      const t = Math.min(1, (ts - start) / duration)
+      // Assemble from scattered state
+      draw(1 - t)
+      if (t < 1) rafRef.current = requestAnimationFrame(animate)
+    }
+    rafRef.current = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [imgLoaded])
+
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-6">
-      <ParticleNetwork />
+    <section
+      ref={sectionRef}
+      id="home"
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{ background: "#0e0e12" }}
+    >
+      {/* Subtle background grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
 
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-blue-600/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-cyan-600/8 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-violet-600/5 rounded-full blur-3xl" />
-      </div>
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-16 py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-16 z-10 pt-20">
-
-        <div className="flex-1 text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-6">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-cyan-400 font-mono text-xs tracking-widest uppercase">Available for hire</span>
-          </div>
-
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-2 leading-none tracking-tight">
-            Navoda
-          </h1>
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-none tracking-tight">
-            <span className="text-shimmer">Perera.</span>
-          </h1>
-
-          <div className="text-xl md:text-2xl font-semibold mb-8 h-10 flex items-center">
-            <TypingText />
-          </div>
-
-          <p className="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed" style={{fontWeight: 300}}>
-            Passionate Computer Engineering undergrad at University of Peradeniya, crafting AI-powered solutions and intelligent systems that make a real difference.
-          </p>
-
-          <div className="flex gap-4 flex-wrap mb-12">
-            <a href="#projects" className="btn-primary px-8 py-3.5 text-white rounded-full font-semibold text-sm">
-              View My Work
-            </a>
-            <a href="/cv.pdf" download="Navoda_Perera_CV.pdf" className="px-8 py-3.5 border border-gray-700 hover:border-cyan-500/50 text-gray-300 hover:text-white rounded-full font-semibold text-sm transition-all duration-300 hover:bg-cyan-500/5">
-              Download CV ?
-            </a>
-            <a href="#contact" className="px-8 py-3.5 border border-gray-700 hover:border-cyan-500/50 text-gray-300 hover:text-white rounded-full font-semibold text-sm transition-all duration-300 hover:bg-cyan-500/5">
-              Get in Touch
-            </a>
-          </div>
-
-          <div className="flex items-center gap-8">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">5+</div>
-              <div className="text-gray-500 text-xs font-mono mt-1">Projects</div>
+          {/* LEFT — text */}
+          <div className="order-2 lg:order-1">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-3 mb-6">
+              <span style={{ display: "inline-block", width: 28, height: 1, background: "#c9a96e" }} />
+              <span
+                className="font-mono text-xs tracking-widest uppercase"
+                style={{ color: "#c9a96e" }}
+              >
+                Full-Stack Developer
+              </span>
             </div>
-            <div className="w-px h-8 bg-gray-800" />
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">8+</div>
-              <div className="text-gray-500 text-xs font-mono mt-1">Technologies</div>
+
+            {/* Name */}
+            <h1
+              className="font-bold mb-3"
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "clamp(2.8rem, 6vw, 5rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.02,
+                color: "#f0ece4",
+              }}
+            >
+              Navoda
+              <br />
+              <span style={{ color: "#c9a96e" }}>Perera</span>
+            </h1>
+
+            {/* Role */}
+            <p
+              className="mb-6 text-base font-mono tracking-wide"
+              style={{ color: "#6e6458" }}
+            >
+              Building thoughtful digital experiences
+            </p>
+
+            {/* Description */}
+            <p
+              className="mb-10 leading-relaxed max-w-md"
+              style={{ color: "#5a5248", fontSize: "0.95rem", lineHeight: 1.85 }}
+            >
+              I craft clean, performant web applications with a sharp eye for
+              elegant design and robust engineering. Currently available for
+              freelance &amp; full-time opportunities.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4 mb-12">
+              <a
+                href="#projects"
+                style={{
+                  padding: "12px 28px",
+                  background: "#c9a96e",
+                  color: "#0e0e12",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  borderRadius: 4,
+                  textDecoration: "none",
+                  transition: "opacity 0.2s",
+                }}
+                onMouseEnter={e => e.target.style.opacity = 0.85}
+                onMouseLeave={e => e.target.style.opacity = 1}
+              >
+                View work
+              </a>
+              <a
+                href="#contact"
+                style={{
+                  padding: "12px 28px",
+                  background: "transparent",
+                  color: "#8a7f6e",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  border: "0.5px solid rgba(255,255,255,0.12)",
+                  borderRadius: 4,
+                  textDecoration: "none",
+                  transition: "border-color 0.2s, color 0.2s",
+                }}
+                onMouseEnter={e => { e.target.style.borderColor = "rgba(201,169,110,0.4)"; e.target.style.color = "#c9a96e" }}
+                onMouseLeave={e => { e.target.style.borderColor = "rgba(255,255,255,0.12)"; e.target.style.color = "#8a7f6e" }}
+              >
+                Get in touch
+              </a>
             </div>
-            <div className="w-px h-8 bg-gray-800" />
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">24h</div>
-              <div className="text-gray-500 text-xs font-mono mt-1">Response</div>
+
+            {/* Stats row */}
+            <div className="flex gap-10">
+              {[
+                { num: "3+", label: "Years exp." },
+                { num: "20+", label: "Projects" },
+                { num: "15+", label: "Clients" },
+              ].map(({ num, label }) => (
+                <div key={label}>
+                  <div
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: "1.6rem",
+                      fontWeight: 700,
+                      color: "#c9a96e",
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {num}
+                  </div>
+                  <div style={{ fontSize: "0.7rem", color: "#4a4540", letterSpacing: "0.06em", marginTop: 4 }}>
+                    {label}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        <div className="flex-shrink-0">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
-              background: "conic-gradient(from 0deg, #22d3ee, #3b82f6, #a78bfa, #22d3ee)",
-              padding: "2px",
-              borderRadius: "50%",
-              filter: "blur(1px)",
-            }} />
+          {/* RIGHT — pixel scatter photo */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+            <div className="relative">
+              {/* Decorative gold ring */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: -16,
+                  borderRadius: "50%",
+                  border: "0.5px solid rgba(201,169,110,0.15)",
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: -32,
+                  borderRadius: "50%",
+                  border: "0.5px solid rgba(201,169,110,0.06)",
+                  pointerEvents: "none",
+                }}
+              />
 
-            <div className="relative w-64 h-64 md:w-80 md:h-80">
-              <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
-                background: "conic-gradient(from 0deg, #22d3ee40, #3b82f640, #a78bfa40, #22d3ee40)",
-                padding: "3px",
-                borderRadius: "50%",
-              }} />
-              <div className="absolute inset-1 rounded-full bg-gray-950" />
-              <div className="absolute inset-3 rounded-full overflow-hidden">
-                <img src={photo} alt="Navoda Perera" className="w-full h-full object-cover object-top" />
+              {/* Canvas — pixel scatter effect renders here */}
+              <div
+                style={{
+                  width: "clamp(260px, 35vw, 420px)",
+                  aspectRatio: "1 / 1",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  position: "relative",
+                  border: "0.5px solid rgba(201,169,110,0.2)",
+                }}
+              >
+                {/* Replace src with your actual photo path */}
+                <img
+                  ref={imgRef}
+                  src="/your-photo.jpg"
+                  alt="Navoda Perera"
+                  onLoad={initCanvas}
+                  style={{ display: "none" }}
+                  crossOrigin="anonymous"
+                />
+                <canvas
+                  ref={canvasRef}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "block",
+                    objectFit: "cover",
+                  }}
+                />
+                {/* Fallback gradient shown until image loads */}
+                {!imgLoaded && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "radial-gradient(circle at 50% 40%, #3d2a1e, #18171e, #0e0e12)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: "3rem",
+                        fontWeight: 700,
+                        color: "#c9a96e",
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      NP
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Availability badge */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 12,
+                  right: -8,
+                  background: "#18171e",
+                  border: "0.5px solid rgba(201,169,110,0.25)",
+                  borderRadius: 6,
+                  padding: "8px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: "#4ade80",
+                    display: "inline-block",
+                    boxShadow: "0 0 0 2px rgba(74,222,128,0.2)",
+                  }}
+                />
+                <span style={{ fontSize: "0.68rem", color: "#8a7f6e", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  Available
+                </span>
               </div>
             </div>
-
-            <div className="absolute -top-4 -right-4 w-16 h-16 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: "0s"}}>
-              <span className="text-2xl">??</span>
-            </div>
-            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: "1s"}}>
-              <span className="text-2xl">??</span>
-            </div>
-            <div className="absolute top-1/2 -right-8 w-14 h-14 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: "2s"}}>
-              <span className="text-xl">??</span>
-            </div>
-            <div className="absolute top-0 -left-8 w-14 h-14 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: "0.5s"}}>
-              <span className="text-xl">??</span>
-            </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-gray-600 text-xs font-mono tracking-widest">SCROLL</span>
-        <div className="w-px h-12 bg-gradient-to-b from-cyan-500/50 to-transparent" />
+      {/* Scroll indicator */}
+      <div
+        className="absolute bottom-10 left-1/2"
+        style={{ transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
+      >
+        <span style={{ fontSize: "0.6rem", color: "#3a3530", letterSpacing: "0.15em", textTransform: "uppercase" }}>Scroll</span>
+        <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #c9a96e40, transparent)" }} />
       </div>
     </section>
   )
