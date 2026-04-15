@@ -33,10 +33,9 @@ export default function Chatbot() {
     if (!input.trim() || loading) return;
 
     const userMsg = { role: "user", content: input };
-    // Only send user messages to API (filter out the initial assistant greeting)
-    const apiMessages = [...messages, userMsg].filter(m => m.role === "user");
+    const updatedMessages = [...messages, userMsg];
 
-    setMessages(prev => [...prev, userMsg]);
+    setMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
@@ -45,15 +44,13 @@ export default function Chatbot() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
+          messages: updatedMessages,
           system: SYSTEM_PROMPT,
-          messages: apiMessages,
         }),
       });
 
       const data = await response.json();
-      const reply = data.content?.[0]?.text || (typeof data.error === "string" ? data.error : data.error?.message) || "Sorry, I could not get a response! 🤖";
+      const reply = data.reply || "Sorry, I could not get a response! 🤖";
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       setMessages(prev => [...prev, {
