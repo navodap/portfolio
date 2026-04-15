@@ -18,11 +18,9 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content:
-        "Hi! I am NOVA, Navoda's AI assistant! Ask me anything about Navoda's skills, projects, or services 🤖",
+      content: "Hi! I am NOVA, Navoda's AI assistant! Ask me anything about Navoda's skills, projects, or services 🤖",
     },
   ]);
-
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
@@ -35,43 +33,34 @@ export default function Chatbot() {
     if (!input.trim() || loading) return;
 
     const userMsg = { role: "user", content: input };
-    const updatedMessages = [...messages, userMsg];
+    // Only send user messages to API (filter out the initial assistant greeting)
+    const apiMessages = [...messages, userMsg].filter(m => m.role === "user");
 
-    setMessages(updatedMessages);
+    setMessages(prev => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: updatedMessages,
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
           system: SYSTEM_PROMPT,
+          messages: apiMessages,
         }),
       });
 
       const data = await response.json();
+      const reply = data.content?.[0]?.text || data.error?.message || "Sorry, I could not get a response! 🤖";
 
-      const reply =
-        data.content?.[0]?.text ||
-        data.error ||
-        "Sorry, I could not get a response! 🤖";
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: reply },
-      ]);
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Something went wrong. Please try again! 🤖",
-        },
-      ]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: "Something went wrong. Please try again! 🤖",
+      }]);
     }
 
     setLoading(false);
@@ -91,7 +80,6 @@ export default function Chatbot() {
           className="mb-4 w-80 bg-gray-900 border border-cyan-800/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           style={{ height: "420px" }}
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-blue-900/80 to-cyan-900/80 px-4 py-3 flex items-center justify-between border-b border-cyan-800/30">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
@@ -99,48 +87,35 @@ export default function Chatbot() {
                 NOVA AI Assistant 🤖
               </span>
             </div>
-
-            <button
-              onClick={() => setOpen(false)}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">✕</button>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-xs px-3 py-2 rounded-xl text-sm ${
-                    msg.role === "user"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700"
-                  }`}
-                >
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-xs px-3 py-2 rounded-xl text-sm ${
+                  msg.role === "user"
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700"
+                }`}>
                   {msg.content}
                 </div>
               </div>
             ))}
-
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-800 px-3 py-2 rounded-xl border border-gray-700 text-gray-300 text-sm">
-                  Thinking...
+                <div className="bg-gray-800 px-3 py-2 rounded-xl border border-gray-700">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{animationDelay: "0ms"}} />
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{animationDelay: "150ms"}} />
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{animationDelay: "300ms"}} />
+                  </div>
                 </div>
               </div>
             )}
-
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="p-3 border-t border-gray-800 flex gap-2">
             <input
               value={input}
@@ -149,7 +124,6 @@ export default function Chatbot() {
               placeholder="Ask about Navoda..."
               className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
             />
-
             <button
               onClick={send}
               disabled={loading || !input.trim()}
@@ -161,7 +135,6 @@ export default function Chatbot() {
         </div>
       )}
 
-      {/* Toggle Button */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-cyan-500 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition"
