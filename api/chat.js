@@ -1,12 +1,8 @@
 export default async function handler(req, res) {
   try {
-    console.log("FUNCTION STARTED");
-
     const { messages, system } = req.body || {};
-    console.log("REQUEST BODY:", JSON.stringify(req.body));
 
     if (!process.env.GEMINI_API_KEY) {
-      console.log("❌ MISSING API KEY");
       return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
     }
 
@@ -15,6 +11,7 @@ export default async function handler(req, res) {
         role: "user",
         parts: [{ text: system || "You are a helpful assistant." }],
       },
+      { role: "model", parts: [{ text: "Understood! I'll follow those instructions." }] },
       ...(messages || []).map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content || "" }],
@@ -30,12 +27,17 @@ export default async function handler(req, res) {
       }
     );
 
-    console.log("STATUS:", response.status);
+    const data = await response.json();
 
-    const text = await response.text();
-    console.log("RAW RESPONSE:", text);
+    // Extract the reply text from Gemini's response structure
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    return res.status(200).json({ debug: text });
+    if (!reply) {
+      console.error("Unexpected Gemini response:", JSON.stringify(data));
+      return res.status(500).json({ error: "No reply from Gemini" });
+    }
+
+    return res.status(200).json({ reply });
 
   } catch (err) {
     console.error("SERVER CRASH:", err);
