@@ -53,8 +53,7 @@ export default function Chatbot() {
       });
 
       const data = await response.json();
-      const reply = data.content?.[0]?.text || data.error?.message || "Sorry, I could not get a response! 🤖";
-
+      const reply = data.content?.[0]?.text || (typeof data.error === "string" ? data.error : data.error?.message) || "Sorry, I could not get a response! 🤖";
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       setMessages(prev => [...prev, {
