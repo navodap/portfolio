@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const contents = [
       {
         role: "user",
-        parts: [{ text: system }], // 🔥 inject system prompt as first message
+        parts: [{ text: system }],
       },
       ...messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,18 +28,17 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 🔥 DEBUG LINE (important)
-    console.log("Gemini response:", JSON.stringify(data));
+    console.log("FULL GEMINI RESPONSE:", JSON.stringify(data));
 
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+    if (!response.ok) {
+      return res.status(500).json({ error: data.error?.message || "API error" });
     }
 
-    const text =
+    const reply =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "No valid response from Gemini";
 
-    return res.status(200).json({ reply: text });
+    return res.status(200).json({ reply });
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
