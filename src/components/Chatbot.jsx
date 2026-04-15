@@ -64,9 +64,9 @@ export default function Chatbot() {
           <div className="bg-gradient-to-r from-blue-900/80 to-cyan-900/80 px-4 py-3 flex items-center justify-between border-b border-cyan-800/30">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-              <span className="text-cyan-300 font-mono text-sm font-semibold">NOVA — AI Assistant</span>
+              <span className="text-cyan-300 font-mono text-sm font-semibold">NOVA ï¿½ AI Assistant</span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white transition-colors text-lg leading-none">×</button>
+            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white transition-colors text-lg leading-none">ï¿½</button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -119,7 +119,7 @@ export default function Chatbot() {
         className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-cyan-500 rounded-full shadow-lg shadow-cyan-500/30 flex items-center justify-center hover:scale-110 transition-transform"
       >
         {open ? (
-          <span className="text-white text-xl">×</span>
+          <span className="text-white text-xl">ï¿½</span>
         ) : (
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
             <rect x="4" y="8" width="20" height="14" rx="4" fill="white" opacity="0.9"/>

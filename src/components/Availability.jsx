@@ -27,7 +27,7 @@ export default function Availability() {
             <p className="text-cyan-400 font-mono text-sm mb-2 tracking-widest uppercase">Available worldwide</p>
             <h2 className="text-4xl font-bold text-white mb-6">Remote Ready. Global Reach.</h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-8">
-              Based in Sri Lanka, I work with clients from anywhere in the world. Whether you are a startup in London, a business in Dubai, or a founder in Silicon Valley — I am ready to build with you.
+              Based in Sri Lanka, I work with clients from anywhere in the world. Whether you are a startup in London, a business in Dubai, or a founder in Silicon Valley ï¿½ I am ready to build with you.
             </p>
             <div className="space-y-4 mb-10">
               {[

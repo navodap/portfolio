@@ -20,7 +20,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-600 text-sm font-mono">
-            © 2026 Navoda Perera. Built with React + Vite + Tailwind CSS
+            ï¿½ 2026 Navoda Perera. Built with React + Vite + Tailwind CSS
           </p>
           <p className="text-gray-600 text-sm font-mono">
             Designed & Developed by <span className="text-cyan-400">Navoda Perera</span>
