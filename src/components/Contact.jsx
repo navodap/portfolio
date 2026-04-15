@@ -38,9 +38,9 @@ export default function Contact() {
 
             <div className="space-y-6">
               {[
-                { icon: "??", label: "Email", value: "your@email.com" },
-                { icon: "??", label: "Location", value: "Sri Lanka (Remote)" },
-                { icon: "?", label: "Response time", value: "Within 24 hours" },
+                { icon: "✉", label: "Email", value: "thiliniperera2004@gmail.com" },
+                { icon: "⌖", label: "Location", value: "Remote" },
+                { icon: "◷", label: "Response time", value: "Within 24 hours" },
               ].map(item => (
                 <div key={item.label} className="flex items-center gap-4 hover-lift group">
                   <div className="w-12 h-12 bg-gray-900 border border-gray-800 group-hover:border-cyan-800 rounded-xl flex items-center justify-center text-xl transition-colors duration-300">
@@ -73,7 +73,7 @@ export default function Contact() {
           <div>
             {sent ? (
               <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-10 text-center animate-scaleIn">
-                <div className="text-5xl mb-4">??</div>
+                <div className="text-5xl mb-4"></div>
                 <p className="text-green-400 text-xl font-semibold mb-2">Message sent!</p>
                 <p className="text-gray-400">Thanks for reaching out. I will get back to you within 24 hours.</p>
               </div>
@@ -118,7 +118,7 @@ export default function Contact() {
                   disabled={loading}
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:opacity-50 text-white rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 animate-gradientShift"
                 >
-                  {loading ? "Sending..." : "Send Message ?"}
+                  {loading ? "Sending..." : "Send Message "}
                 </button>
               </form>
             )}
