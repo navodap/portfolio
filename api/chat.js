@@ -1,15 +1,11 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
   try {
     const { messages, system } = req.body;
 
     const contents = [
       {
         role: "user",
-        parts: [{ text: system }],
+        parts: [{ text: system || "You are a helpful assistant." }],
       },
       ...messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -26,21 +22,13 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.json();
+    const text = await response.text(); // 🔥 IMPORTANT
+    console.log("RAW RESPONSE:", text);
 
-    console.log("FULL GEMINI RESPONSE:", JSON.stringify(data));
-
-    if (!response.ok) {
-      return res.status(500).json({ error: data.error?.message || "API error" });
-    }
-
-    const reply =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No valid response from Gemini";
-
-    return res.status(200).json({ reply });
+    return res.status(200).json({ debug: text });
 
   } catch (err) {
+    console.error("SERVER ERROR:", err);
     return res.status(500).json({ error: err.message });
   }
 }
