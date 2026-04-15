@@ -34,15 +34,14 @@ export default function Chatbot() {
     setLoading(true)
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: [...messages, userMsg].filter(m => m.role !== "system")
-        })
+      const response = await fetch("/api/chat", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({
+       messages: [...messages, userMsg],
+       system: SYSTEM_PROMPT,
+         })
+     
       })
       const data = await response.json()
       const reply = data.content?.[0]?.text || "Sorry, I could not get a response!"
