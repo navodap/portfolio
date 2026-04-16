@@ -21,7 +21,7 @@ const TREE = {
     ],
   },
   skills_web: {
-    message: "For web dev, Navoda works with React, JavaScript, Tailwind CSS, and Next.js. He builds fast, modern, responsive websites! 🌐",
+    message: "For web dev, Navoda works with React, JavaScript, Tailwind CSS, and Next.js. She builds fast, modern, responsive websites! 🌐",
     options: [
       { label: "🤖 AI & Computer Vision", next: "skills_ai" },
       { label: "💼 See related projects", next: "projects" },
@@ -29,7 +29,7 @@ const TREE = {
     ],
   },
   skills_ai: {
-    message: "In AI & CV, Navoda uses Python, TensorFlow, OpenCV, and MediaPipe. He's built real gesture recognition systems! 🤖",
+    message: "In AI & CV, Navoda uses Python, TensorFlow, OpenCV, and MediaPipe. She's built real gesture recognition systems! 🤖",
     options: [
       { label: "🌐 Web Development", next: "skills_web" },
       { label: "💼 See AI projects", next: "projects_ai" },
@@ -69,7 +69,7 @@ const TREE = {
     ],
   },
   projects_hardware: {
-    message: "⚙️ Line Following Robot — An Arduino-based robot that autonomously follows a line path using sensors and C/C++ logic.",
+    message: "⚙️ Line Following Robot — An Arduino-based robot that autonomously follows a line path using sensors .",
     options: [
       { label: "🤖 AI / CV Projects", next: "projects_ai" },
       { label: "🌐 Web Projects", next: "projects_web" },
@@ -94,7 +94,7 @@ const TREE = {
     ],
   },
   services_uiux: {
-    message: "Navoda designs clean, modern UI/UX with a focus on user experience and aesthetic appeal. He can bring your ideas to life! 🎨",
+    message: "Navoda designs clean, modern UI/UX with a focus on user experience and aesthetic appeal. She can bring your ideas to life! 🎨",
     options: [
       { label: "💰 Pricing info", next: "pricing" },
       { label: "📬 Contact Navoda", next: "contact" },
@@ -117,7 +117,7 @@ const TREE = {
     ],
   },
   contact: {
-    message: "You can reach Navoda through the contact form on this portfolio website! He's based in Sri Lanka and available for remote work worldwide. 🌍",
+    message: "You can reach Navoda through the contact form on this portfolio website! She's based in Sri Lanka and available for remote work worldwide. 🌍",
     options: [
       { label: "⬅️ Back to menu", next: "start" },
     ],
