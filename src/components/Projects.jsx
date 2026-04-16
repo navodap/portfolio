@@ -20,7 +20,7 @@ const projects = [
     year: "2024",
     description: "Real-time hand gesture detection using computer vision. Lets users control interfaces without touching a screen.",
     tags: ["Python", "OpenCV", "MediaPipe"],
-    github: "#",
+    
     accent: "#22d3ee",
     accentBg: "rgba(34,211,238,0.06)",
     accentBorder: "rgba(34,211,238,0.2)",
@@ -31,8 +31,8 @@ const projects = [
     category: "web",
     year: "2024",
     description: "AI-powered web app that matches university students with ideal project partners based on skills and interests.",
-    tags: ["React", "Node.js", "AI"],
-    github: "#",
+    tags: ["Html", "css", "JS"],
+    
     accent: "#818cf8",
     accentBg: "rgba(129,140,248,0.06)",
     accentBorder: "rgba(129,140,248,0.2)",
@@ -44,7 +44,7 @@ const projects = [
     year: "2023",
     description: "Smart travel planning web app. Plan full itineraries, discover places, and manage trips in one place.",
     tags: ["React", "Tailwind", "Maps API"],
-    github: "#",
+    
     accent: "#2dd4bf",
     accentBg: "rgba(45,212,191,0.06)",
     accentBorder: "rgba(45,212,191,0.2)",
@@ -55,8 +55,8 @@ const projects = [
     category: "robotics",
     year: "2023",
     description: "Autonomous Arduino robot using IR sensors to follow lines on a track with high precision and speed.",
-    tags: ["Arduino", "C++", "IR Sensors"],
-    github: "#",
+    tags: ["Arduino","IR Sensors"],
+    
     accent: "#fb923c",
     accentBg: "rgba(251,146,60,0.06)",
     accentBorder: "rgba(251,146,60,0.2)",
@@ -68,7 +68,7 @@ const projects = [
     year: "2024",
     description: "AI assistant designed for small and medium enterprises. Automates reports, answers queries, and tracks metrics.",
     tags: ["Python", "LangChain", "FastAPI"],
-    github: "#",
+    
     accent: "#a78bfa",
     accentBg: "rgba(167,139,250,0.06)",
     accentBorder: "rgba(167,139,250,0.2)",
