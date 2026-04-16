@@ -3,7 +3,6 @@ import Navbar from "./components/Navbar"
 import Hero from "./components/Hero"
 import About from "./components/About"
 import Services from "./components/Services"
-
 import Projects from "./components/Projects"
 import Availability from "./components/Availability"
 import Contact from "./components/Contact"
@@ -33,8 +32,6 @@ function CursorGlow() {
     />
   )
 }
-
-
 
 function Loader({ onDone }) {
   const [progress, setProgress] = useState(0)
@@ -75,17 +72,20 @@ export default function App() {
         <CursorGlow />
         <Robot />
         <Chatbot />
-        
+
+        {/* Background gradients */}
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(34,211,238,0.05),transparent)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_80%_at_80%_50%,rgba(59,130,246,0.04),transparent)]" />
         </div>
-          <Navbar />
+
+        <Navbar />
+
+        {/* All sections — full width, each centers itself internally */}
+        <div className="relative z-10 w-full">
           <Hero />
-        <div className="relative z-10 flex flex-col items-center">
           <About />
           <Services />
-          
           <Projects />
           <Availability />
           <Contact />
