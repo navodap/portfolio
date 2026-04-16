@@ -174,26 +174,43 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-wrap gap-4 mt-6">
-            <button className="btn-primary px-6 py-3 rounded-lg">View My Work</button>
-            <button className="btn-primary px-6 py-3 rounded-lg">Download CV</button>
-            <button className="btn-primary px-6 py-3 rounded-lg">Get in Touch</button>
+            <button
+              className="btn-primary px-6 py-3 rounded-lg"
+              onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              View My Work
+            </button>
+
+            <a
+              href="/Navoda_CV.pdf"
+              download
+              className="btn-primary px-6 py-3 rounded-lg"
+            >
+              Download CV
+            </a>
+
+            <button
+              className="btn-primary px-6 py-3 rounded-lg"
+              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Get in Touch
+            </button>
           </div>
-        
 
           <div className="grid grid-cols-3 gap-6 mt-10 text-center">
-          <div>
-            <h3 className="text-2xl font-bold text-cyan-400">5+</h3>
-            <p className="text-sm text-gray-400">Projects</p>
+            <div>
+              <h3 className="text-2xl font-bold text-cyan-400">5+</h3>
+              <p className="text-sm text-gray-400">Projects</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-blue-400">8+</h3>
+              <p className="text-sm text-gray-400">Technologies</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-violet-400">24h</h3>
+              <p className="text-sm text-gray-400">Response</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-blue-400">8+</h3>
-            <p className="text-sm text-gray-400">Technologies</p>
-          </div>
-          <div>
-             <h3 className="text-2xl font-bold text-violet-400">24h</h3>
-             <p className="text-sm text-gray-400">Response</p>
-          </div>
-        </div>
         </div>
 
         <div className="flex-shrink-0">
@@ -240,9 +257,7 @@ export default function Hero() {
         </div>
 
       </div>
-      <div>
-        
-      </div>
+
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
         <span className="text-gray-600 text-xs font-mono tracking-widest">SCROLL</span>
         <div className="w-px h-12 bg-gradient-to-b from-cyan-500/50 to-transparent" />

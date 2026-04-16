@@ -1,171 +1,267 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import photo from "../photo.jpg"
 
-function useInView() {
-  const ref = useRef(null)
-  const [inView, setInView] = useState(false)
+const roles = ["Full Stack Developer", "AI Engineer", "UI/UX Designer", "Mobile App Developer", "Computer Vision Expert"]
+
+function ParticleNetwork() {
+  const canvasRef = useRef(null)
+  const mouse = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setInView(true)
-        observer.disconnect()
-      }
-    }, { threshold: 0.2 })
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+    let W = canvas.width = window.innerWidth
+    let H = canvas.height = window.innerHeight
 
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    const PARTICLE_COUNT = 80
+    const CONNECTION_DIST = 150
+    const MOUSE_DIST = 200
+
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.5 + 0.5,
+      alpha: Math.random() * 0.5 + 0.2,
+    }))
+
+    const onMouseMove = e => { mouse.current = { x: e.clientX, y: e.clientY } }
+    window.addEventListener("mousemove", onMouseMove)
+
+    let frame
+    function draw() {
+      ctx.clearRect(0, 0, W, H)
+
+      particles.forEach(p => {
+        const dx = mouse.current.x - p.x
+        const dy = mouse.current.y - p.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < MOUSE_DIST) {
+          p.vx += dx * 0.00008
+          p.vy += dy * 0.00008
+        }
+
+        p.x += p.vx
+        p.y += p.vy
+        p.vx *= 0.99
+        p.vy *= 0.99
+
+        if (p.x < 0 || p.x > W) p.vx *= -1
+        if (p.y < 0 || p.y > H) p.vy *= -1
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(34, 211, 238, ${p.alpha})`
+        ctx.fill()
+      })
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < CONNECTION_DIST) {
+            const opacity = (1 - dist / CONNECTION_DIST) * 0.15
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`
+            ctx.lineWidth = 0.5
+            ctx.stroke()
+          }
+        }
+      }
+
+      const mdx = mouse.current.x
+      const mdy = mouse.current.y
+      particles.forEach(p => {
+        const dx = mdx - p.x
+        const dy = mdy - p.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < MOUSE_DIST) {
+          const opacity = (1 - dist / MOUSE_DIST) * 0.3
+          ctx.beginPath()
+          ctx.moveTo(p.x, p.y)
+          ctx.lineTo(mdx, mdy)
+          ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`
+          ctx.lineWidth = 0.5
+          ctx.stroke()
+        }
+      })
+
+      frame = requestAnimationFrame(draw)
+    }
+    draw()
+
+    const onResize = () => {
+      W = canvas.width = window.innerWidth
+      H = canvas.height = window.innerHeight
+    }
+    window.addEventListener("resize", onResize)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener("mousemove", onMouseMove)
+      window.removeEventListener("resize", onResize)
+    }
   }, [])
 
-  return [ref, inView]
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 }
 
-function Counter({ target, label }) {
-  const [count, setCount] = useState(0)
-  const [ref, inView] = useInView()
+function TypingText() {
+  const [index, setIndex] = useState(0)
+  const [displayed, setDisplayed] = useState("")
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
-    if (!inView) return
-    let start = 0
-    const step = Math.ceil(target / 40)
-
-    const interval = setInterval(() => {
-      start += step
-      if (start >= target) {
-        setCount(target)
-        clearInterval(interval)
-      } else {
-        setCount(start)
-      }
-    }, 40)
-
-    return () => clearInterval(interval)
-  }, [inView, target])
+    const current = roles[index]
+    let timeout
+    if (!deleting && displayed.length < current.length) {
+      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 70)
+    } else if (!deleting && displayed.length === current.length) {
+      timeout = setTimeout(() => setDeleting(true), 2500)
+    } else if (deleting && displayed.length > 0) {
+      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length - 1)), 35)
+    } else if (deleting && displayed.length === 0) {
+      setDeleting(false)
+      setIndex((index + 1) % roles.length)
+    }
+    return () => clearTimeout(timeout)
+  }, [displayed, deleting, index])
 
   return (
-    <div ref={ref} className="text-center">
-      <div className="text-5xl font-bold text-cyan-400 mb-2">
-        {count}+
-      </div>
-      <div className="text-gray-500 text-sm font-mono tracking-wide">
-        {label}
-      </div>
-    </div>
+    <span className="text-gradient">
+      {displayed}
+      <span className="animate-pulse text-cyan-400">|</span>
+    </span>
   )
 }
 
-function FadeIn({ children, delay = 0 }) {
-  const [ref, inView] = useInView()
-
+export default function Hero() {
   return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ${
-        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
-    >
-      {children}
-    </div>
-  )
-}
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-6">
+      <ParticleNetwork />
 
-export default function About() {
-  return (
-   <section id="about" className="py-52 px-6 max-w-6xl mx-auto">
-
-      {/* Header */}
-      <FadeIn>
-        <p className="text-cyan-400 font-mono text-sm mb-2 tracking-widest uppercase">
-          Who I am
-        </p>
-        <h2 className="text-4xl font-bold text-white mb-16">
-          About Me
-        </h2>
-      </FadeIn>
-
-      {/* Content */}
-      <div className="grid md:grid-cols-2 gap-16 items-start mb-24">
-
-        {/* Left Text */}
-        <FadeIn delay={100}>
-          <div className="space-y-5 text-gray-400 text-lg leading-relaxed max-w-xl">
-
-            <p>
-              I’m a Computer Engineering undergraduate at the University of
-              Peradeniya, Sri Lanka, passionate about building intelligent
-              systems that solve real-world problems.
-            </p>
-
-            <p>
-              My interests lie in AI, Computer Vision, and modern web
-              technologies, turning ideas into impactful products.
-            </p>
-
-            <p>
-              From Arduino-based robotics to full-stack AI applications, I enjoy
-              creating solutions that make a difference.
-            </p>
-
-          </div>
-        </FadeIn>
-
-        {/* Right Card */}
-        <FadeIn delay={200}>
-          <div className="bg-gray-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg space-y-4 w-full max-w-lg transition-all duration-300 hover:border-cyan-500/30 hover:shadow-cyan-500/10">
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">University</span>
-              <span className="text-white">University of Peradeniya</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Degree</span>
-              <span className="text-white">Computer Engineering</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Semester</span>
-              <span className="text-white">Semester 3</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Location</span>
-              <span className="text-white">Sri Lanka</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-cyan-400 text-sm">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              Open to opportunities
-            </div>
-
-          </div>
-        </FadeIn>
-
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-blue-600/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-cyan-600/8 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-violet-600/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Stats */}
-      <FadeIn delay={300}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pt-16 mt-10 border-t border-gray-800">
+      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-16 z-10 pt-20">
 
-          <FadeIn delay={400}>
-            <Counter target={5} label="Projects Built" />
-          </FadeIn>
+        <div className="flex-1 text-left">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-6">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-cyan-400 font-mono text-xs tracking-widest uppercase">Available for hire</span>
+          </div>
 
-          <FadeIn delay={500}>
-            <Counter target={8} label="Technologies" />
-          </FadeIn>
+          <h1 className="text-6xl md:text-8xl font-bold text-white mb-2 leading-none tracking-tight">
+            Navoda
+          </h1>
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-none tracking-tight">
+            <span className="text-shimmer">Perera </span>
+          </h1>
 
-          <FadeIn delay={600}>
-            <Counter target={3} label="Semesters Done" />
-          </FadeIn>
+          <div className="text-xl md:text-2xl font-semibold mb-8 h-10 flex items-center">
+            <TypingText />
+          </div>
 
-          <FadeIn delay={700}>
-            <Counter target={100} label="Commits" />
-          </FadeIn>
+          <p className="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed" style={{fontWeight: 300}}>
+            Passionate Computer Engineering undergrad at University of Peradeniya, crafting AI-powered solutions and intelligent systems that make a real difference.
+          </p>
 
+          <div className="flex flex-wrap gap-4 mt-6">
+            <button
+              className="btn-primary px-6 py-3 rounded-lg"
+              onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              View My Work
+            </button>
+
+            <a
+              href="/Navoda_CV.pdf"
+              download
+              className="btn-primary px-6 py-3 rounded-lg"
+            >
+              Download CV
+            </a>
+
+            <button
+              className="btn-primary px-6 py-3 rounded-lg"
+              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Get in Touch
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-6 mt-10 text-center">
+            <div>
+              <h3 className="text-2xl font-bold text-cyan-400">5+</h3>
+              <p className="text-sm text-gray-400">Projects</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-blue-400">8+</h3>
+              <p className="text-sm text-gray-400">Technologies</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-violet-400">24h</h3>
+              <p className="text-sm text-gray-400">Response</p>
+            </div>
+          </div>
         </div>
-      </FadeIn>
 
+        <div className="flex-shrink-0">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
+              background: "conic-gradient(from 0deg, #22d3ee, #3b82f6, #a78bfa, #22d3ee)",
+              padding: "2px",
+              borderRadius: "50%",
+              filter: "blur(1px)",
+            }} />
+
+            <div className="relative w-64 h-64 md:w-80 md:h-80">
+              <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
+                background: "conic-gradient(from 0deg, #22d3ee40, #3b82f640, #a78bfa40, #22d3ee40)",
+                padding: "3px",
+                borderRadius: "50%",
+              }} />
+              <div className="absolute inset-1 rounded-full bg-gray-950" />
+              <div className="absolute inset-3 rounded-full overflow-hidden">
+                <img src={photo} alt="Navoda Perera" className="w-full h-full object-cover object-top" />
+              </div>
+            </div>
+
+            <div className="absolute -top-4 -right-4 px-4 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
+              style={{ animationDelay: "0s" }}>
+               Robotics  
+            </div>
+
+            <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-gray-900/70 border border-blue-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
+              style={{ animationDelay: "1s" }}>
+              Web Dev
+            </div>
+
+            <div className="absolute top-1/2 -right-8 px-3 py-2 bg-gray-900/70 border border-violet-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
+             style={{ animationDelay: "2s" }}>
+              AI
+            </div>
+
+            <div className="absolute top-0 -left-8 px-3 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
+              style={{ animationDelay: "0.5s" }}>
+              ML
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <span className="text-gray-600 text-xs font-mono tracking-widest">SCROLL</span>
+        <div className="w-px h-12 bg-gradient-to-b from-cyan-500/50 to-transparent" />
+      </div>
     </section>
   )
 }
