@@ -181,12 +181,8 @@ export default function Hero() {
               View My Work
             </button>
 
-            <a
-              href="/Navoda_CV.pdf"
-              download
-              className="btn-primary px-6 py-3 rounded-lg"
-            >
-              Download CV
+            <a href="/cv.pdf" download className="btn-primary px-6 py-3 rounded-lg">
+            Download CV
             </a>
 
             <button
