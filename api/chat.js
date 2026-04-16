@@ -1,39 +1,35 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req, res) {
   try {
     const { messages, system } = req.body || {};
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
     }
 
-    const contents = [
-      {
-        role: "user",
-        parts: [{ text: system || "You are a helpful assistant." }],
-      },
-      { role: "model", parts: [{ text: "Understood! I'll follow those instructions." }] },
-      ...(messages || []).map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content || "" }],
-      })),
-    ];
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents }),
-      }
+    // Filter out the initial assistant greeting from message history
+    const chatMessages = (messages || []).filter(
+      (m) => !(m.role === "assistant" && m.content.includes("Hi! I am NOVA"))
     );
 
-    const data = await response.json();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: system || "You are a helpful assistant." },
+        ...chatMessages,
+      ],
+      max_tokens: 1000,
+    });
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const reply = response.choices[0]?.message?.content;
 
     if (!reply) {
-      console.error("Unexpected Gemini response:", JSON.stringify(data));
-      return res.status(500).json({ error: "No reply from Gemini" });
+      return res.status(500).json({ error: "No reply from OpenAI" });
     }
 
     return res.status(200).json({ reply });
