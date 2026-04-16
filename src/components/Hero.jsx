@@ -32,7 +32,6 @@ function ParticleNetwork() {
     let frame
     function draw() {
       ctx.clearRect(0, 0, W, H)
-
       particles.forEach(p => {
         const dx = mouse.current.x - p.x
         const dy = mouse.current.y - p.y
@@ -41,15 +40,12 @@ function ParticleNetwork() {
           p.vx += dx * 0.00008
           p.vy += dy * 0.00008
         }
-
         p.x += p.vx
         p.y += p.vy
         p.vx *= 0.99
         p.vy *= 0.99
-
         if (p.x < 0 || p.x > W) p.vx *= -1
         if (p.y < 0 || p.y > H) p.vy *= -1
-
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(34, 211, 238, ${p.alpha})`
@@ -141,7 +137,7 @@ function TypingText() {
 
 export default function Hero() {
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-6">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-5 md:px-6">
       <ParticleNetwork />
 
       <div className="absolute inset-0 pointer-events-none">
@@ -150,66 +146,68 @@ export default function Hero() {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-violet-600/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-16 z-10 pt-20">
+      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-16 z-10 pt-20 pb-10">
 
-        <div className="flex-1 text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-6">
+        {/* Text content */}
+        <div className="flex-1 text-left w-full">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full mb-5 md:mb-6">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-cyan-400 font-mono text-xs tracking-widest uppercase">Available for hire</span>
+            <span className="text-cyan-400 font-mono text-[10px] md:text-xs tracking-widest uppercase">Available for hire</span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-2 leading-none tracking-tight">
+          <h1 className="text-5xl md:text-8xl font-bold text-white mb-2 leading-none tracking-tight">
             Navoda
           </h1>
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-none tracking-tight">
-            <span className="text-shimmer">Perera </span>
+          <h1 className="text-5xl md:text-8xl font-bold mb-5 md:mb-6 leading-none tracking-tight">
+            <span className="text-shimmer">Perera</span>
           </h1>
 
-          <div className="text-xl md:text-2xl font-semibold mb-8 h-10 flex items-center">
+          <div className="text-lg md:text-2xl font-semibold mb-6 md:mb-8 h-8 md:h-10 flex items-center">
             <TypingText />
           </div>
 
-          <p className="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed" style={{fontWeight: 300}}>
+          <p className="text-gray-400 text-base md:text-lg mb-8 md:mb-10 max-w-lg leading-relaxed" style={{ fontWeight: 300 }}>
             Passionate Computer Engineering undergrad at University of Peradeniya, crafting AI-powered solutions and intelligent systems that make a real difference.
           </p>
 
-          <div className="flex flex-wrap gap-4 mt-6">
+          {/* Buttons — stack on mobile, row on desktop */}
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4 md:mt-6">
             <button
-              className="btn-primary px-6 py-3 rounded-lg"
+              className="btn-primary px-6 py-3 rounded-lg text-sm md:text-base"
               onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}
             >
               View My Work
             </button>
-
-            <a href="/cv.pdf" download className="btn-primary px-6 py-3 rounded-lg">
-            Download CV
+            <a href="/cv.pdf" download className="btn-primary px-6 py-3 rounded-lg text-center text-sm md:text-base">
+              Download CV
             </a>
-
             <button
-              className="btn-primary px-6 py-3 rounded-lg"
+              className="btn-primary px-6 py-3 rounded-lg text-sm md:text-base"
               onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
             >
               Get in Touch
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 mt-10 text-center">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-10 text-center">
             <div>
-              <h3 className="text-2xl font-bold text-cyan-400">5+</h3>
-              <p className="text-sm text-gray-400">Projects</p>
+              <h3 className="text-xl md:text-2xl font-bold text-cyan-400">5+</h3>
+              <p className="text-xs md:text-sm text-gray-400">Projects</p>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-blue-400">8+</h3>
-              <p className="text-sm text-gray-400">Technologies</p>
+              <h3 className="text-xl md:text-2xl font-bold text-blue-400">8+</h3>
+              <p className="text-xs md:text-sm text-gray-400">Technologies</p>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-violet-400">24h</h3>
-              <p className="text-sm text-gray-400">Response</p>
+              <h3 className="text-xl md:text-2xl font-bold text-violet-400">24h</h3>
+              <p className="text-xs md:text-sm text-gray-400">Response</p>
             </div>
           </div>
         </div>
 
-        <div className="flex-shrink-0">
+        {/* Photo — hidden on mobile, shown on md+ */}
+        <div className="hidden md:flex flex-shrink-0">
           <div className="relative">
             <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
               background: "conic-gradient(from 0deg, #22d3ee, #3b82f6, #a78bfa, #22d3ee)",
@@ -217,7 +215,6 @@ export default function Hero() {
               borderRadius: "50%",
               filter: "blur(1px)",
             }} />
-
             <div className="relative w-64 h-64 md:w-80 md:h-80">
               <div className="absolute inset-0 rounded-full animate-rotateSlow" style={{
                 background: "conic-gradient(from 0deg, #22d3ee40, #3b82f640, #a78bfa40, #22d3ee40)",
@@ -230,23 +227,16 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="absolute -top-4 -right-4 px-4 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
-              style={{ animationDelay: "0s" }}>
-               Robotics  
+            <div className="absolute -top-4 -right-4 px-4 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300" style={{ animationDelay: "0s" }}>
+              Robotics
             </div>
-
-            <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-gray-900/70 border border-blue-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
-              style={{ animationDelay: "1s" }}>
+            <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-gray-900/70 border border-blue-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300" style={{ animationDelay: "1s" }}>
               Web Dev
             </div>
-
-            <div className="absolute top-1/2 -right-8 px-3 py-2 bg-gray-900/70 border border-violet-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
-             style={{ animationDelay: "2s" }}>
+            <div className="absolute top-1/2 -right-8 px-3 py-2 bg-gray-900/70 border border-violet-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300" style={{ animationDelay: "2s" }}>
               AI
             </div>
-
-            <div className="absolute top-0 -left-8 px-3 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300"
-              style={{ animationDelay: "0.5s" }}>
+            <div className="absolute top-0 -left-8 px-3 py-2 bg-gray-900/70 border border-cyan-500/30 rounded-xl text-xs font-mono backdrop-blur animate-float hover:scale-110 transition-all duration-300" style={{ animationDelay: "0.5s" }}>
               ML
             </div>
           </div>
