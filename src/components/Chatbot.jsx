@@ -123,10 +123,10 @@ const TREE = {
     ],
   },
   about: {
-    message: "Navoda Perera is a Computer Engineering student at University of Peradeniya, Sri Lanka (Semester 3). He's passionate about AI, web dev, and building cool things! 🎓",
+    message: "Navoda Perera is a Computer Engineering student at University of Peradeniya, Sri Lanka (Semester 3). She's passionate about AI, web dev, and building cool things! 🎓",
     options: [
-      { label: "🛠️ His skills", next: "skills" },
-      { label: "💼 His projects", next: "projects" },
+      { label: "🛠️ Her skills", next: "skills" },
+      { label: "💼 Her projects", next: "projects" },
       { label: "📬 Contact him", next: "contact" },
       { label: "⬅️ Back to menu", next: "start" },
     ],
