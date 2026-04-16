@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react"
 
 const TREE = {
   start: {
-    message: "Hi! I'm NOVA, Navoda's AI assistant! What would you like to know? 🤖",
+    message: "Hi! I'm NOVA, Navoda's  assistant! What would you like to know? 🤖",
     options: [
       { label: "🛠️ Skills & Tech Stack", next: "skills" },
       { label: "💼 Projects", next: "projects" },
